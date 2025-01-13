@@ -63,21 +63,27 @@ def get_movie_provider(movie_id: int) -> list:
     }
 
     response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        data = response.json().get('results', {}).get('BR', {})['flatrate']
 
-        if data:
-            provedores = []
-            for provider in data:
-                provedores.append(provider['provider_name'])
+    try:
+        if response.status_code == 200:
+            #essa parte ele pega os provedores de stream do filme
+            data = response.json().get('results', {}).get('BR', {})['flatrate']
 
-            provedores = ", ".join(provedores[:3])
+            if data:
+                provedores = []
+                for provider in data:
+                    provedores.append(provider['provider_name'])
 
-            return provedores
-        
-        return ["Nenhum provedor encontrado no Brasil"]
+                provedores = ", ".join(provedores[:3])
 
-    return ["Falha ao buscar provedores do filme"]
+                return provedores
+            
+            return ["Nenhum provedor encontrado no Brasil"]
+
+        return ["Falha ao buscar provedores do filme"]
+    
+    except KeyError:
+        raise KeyError
 
 def fetch_movie_data(movie_name: str) -> dict:
 
@@ -86,10 +92,13 @@ def fetch_movie_data(movie_name: str) -> dict:
     if "error" in movie:
         return movie
     
-    movie_id = movie.get('id')
-    movie_details = get_movie_details(movie_id)
-    movie_providers = get_movie_provider(movie_id)
+    try:
+        movie_id = movie.get('id')
+        movie_details = get_movie_details(movie_id)
+        movie_providers = get_movie_provider(movie_id)
 
+    except KeyError:
+        return {"error": "Falha ao buscar detalhes do filme"}
 
     return {
         "title": movie_details.get('title'),
