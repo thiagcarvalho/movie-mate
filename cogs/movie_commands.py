@@ -1,13 +1,15 @@
 from discord.ext import commands
 from database import add_movie, get_movies, get_movieid_by_name, delete_movie, update_movie, get_movies_names, get_movie_info
-from utils.helper_functions import check_message, formata_lista, valida_nome
+from utils.helper_functions import check_message, formata_lista
 from utils.embeds import send_error_embed, success_embed, info_embed, warning_embed
 from utils.pagination_view import PaginationView
+from utils.film_selection import FilmSelectionView
 from api.movie_api import fetch_movie_data
 
 import asyncio
 import random
 import discord
+import time
 
 class MovieCommands(commands.Cog):
     def __init__(self, bot):
@@ -16,19 +18,14 @@ class MovieCommands(commands.Cog):
     @commands.command(name='addfilme', brief='Adiciona um filme à lista de filmes')
     async def add_movie_command(self, ctx: commands.Context, *, movie_name: str):
 
-        if not valida_nome(movie_name):
-            await ctx.send(embed=warning_embed('Nome do filme deve conter apenas letras e números.'))
-            return
-        
-        if get_movieid_by_name(movie_name):
-            await ctx.send(embed=send_error_embed(f'O filme {movie_name} já foi adicionado.'))
-            return
-
         movie = fetch_movie_data(movie_name)    
 
-        print(movie)
         if 'error' in movie:
             await ctx.send(embed=send_error_embed(f'O filme {movie_name} não foi encontrado.'))
+            return
+        
+        if get_movieid_by_name(movie['title']):
+            await ctx.send(embed=send_error_embed(f'O filme {movie_name} já foi adicionado.'))
             return
 
         if ctx.author.nick:
@@ -36,7 +33,7 @@ class MovieCommands(commands.Cog):
         else:
             nickname = ctx.author.name
 
-        add_movie(movie_name, movie['tmdb_id'], movie['duracao'], movie['provedores'], movie['rating'], movie['poster_url'], nickname)
+        add_movie(movie['title'], movie['tmdb_id'], movie['duracao'], movie['provedores'], movie['rating'], movie['poster_url'], nickname)
 
         embed_filme = discord.Embed(
             color=discord.Color.dark_green(),
@@ -44,7 +41,7 @@ class MovieCommands(commands.Cog):
         )
 
         embed_filme.set_thumbnail(url=f"https://image.tmdb.org/t/p/original{movie['poster_url']}")
-        embed_filme.add_field(name='Nome:', value=movie_name, inline=False)
+        embed_filme.add_field(name='Nome:', value=movie['title'], inline=False)
         embed_filme.add_field(name='Duração:', value=movie['duracao'])
         embed_filme.add_field(name='Adicionado por:', value=nickname)
 
@@ -61,12 +58,8 @@ class MovieCommands(commands.Cog):
         pagination_view = PaginationView(movies, ctx)
         await pagination_view.send(ctx)
 
-    @commands.command(name='info', brief='Mostra onde o filme está disponível')
+    @commands.command(name='infofilme', brief='Mostra onde o filme está disponível')
     async def onde_passa_filme(self, ctx: commands.Context, *, movie_name: str):
-        if not valida_nome(movie_name):
-            await ctx.send(embed=warning_embed('Nome do filme deve conter apenas letras e números.'))
-            return
-        
         movie = fetch_movie_data(movie_name)
 
         if 'error' in movie:
@@ -134,30 +127,29 @@ class MovieCommands(commands.Cog):
                 embed_filme.add_field(name='Duração:', value=duracao)
                 embed_filme.add_field(name='Streamio:', value=streamio)
 
-
                 await ctx.send(embed=embed_filme)
 
-                await ctx.send(embed=info_embed('Deseja selecionar o filme? (sim/nao)'))
+                view = FilmSelectionView(ctx)
+                await ctx.send(embed=info_embed('Deseja selecionar o filme?'), view=view)
+                
+                await view.wait()
 
-                msg = await self.bot.wait_for('message', timeout=40, 
-                                            check=lambda message: check_message(message, ctx.author, ctx.channel))
-
-                if msg.content.lower() == 'sim':
+                if view.response:
                     selecionado = True
-                    
                     if not update_movie(movie_id):
                         await ctx.send(embed=send_error_embed('Não foi possível selecionar o filme.'))
                         return
+                    
+                    await ctx.send(embed=success_embed(f'O filme {filme[0]} foi selecionado com sucesso!'))
+                    return
 
-                    await ctx.send(embed=success_embed('Filme selecionado com sucesso!'))
-                    return 
-                
-                elif msg.content.lower() == 'nao':
+                elif view.response == False:
                     rejeitados.append(filme[0])
                     await ctx.send(embed=info_embed('Filme rejeitado. Sorteando outro filme...'))
-                
+                    time.sleep(2)
                 else:
-                    await ctx.send(embed=send_error_embed('Resposta inválida. Responda com "sim" ou "não".'))
+                    await ctx.send(embed=send_error_embed('Erro ao selecionar o filme.'))
+                    return
                 
         except asyncio.TimeoutError:
             await ctx.send(embed=warning_embed('Tempo esgotado para selecionar o filme.'))

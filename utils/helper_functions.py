@@ -15,10 +15,3 @@ def formata_lista(movies: list) -> str:
     
     movie_names = [movie[0] for movie in movies]
     return f'{", ".join(movie_names)}'
-
-def valida_nome(movie_name: str) -> bool:
-    """
-    Valida se o nome do filme é válido
-    """
-    result = bool(re.match(r'^[a-zA-Z0-9\s]+$', movie_name))
-    return result
