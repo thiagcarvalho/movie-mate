@@ -75,7 +75,6 @@ def get_movie_provider(movie_id: int) -> list:
                     provedores.append(provider['provider_name'])
 
                 provedores = ", ".join(provedores[:3])
-
                 return provedores
             
             return ["Nenhum provedor encontrado no Brasil"]
@@ -83,7 +82,7 @@ def get_movie_provider(movie_id: int) -> list:
         return ["Falha ao buscar provedores do filme"]
     
     except KeyError:
-        raise KeyError
+        return "Streamio"
 
 def fetch_movie_data(movie_name: str) -> dict:
 
@@ -92,13 +91,9 @@ def fetch_movie_data(movie_name: str) -> dict:
     if "error" in movie:
         return movie
     
-    try:
-        movie_id = movie.get('id')
-        movie_details = get_movie_details(movie_id)
-        movie_providers = get_movie_provider(movie_id)
-
-    except KeyError:
-        return {"error": "Falha ao buscar detalhes do filme"}
+    movie_id = movie.get('id')
+    movie_details = get_movie_details(movie_id)
+    movie_providers = get_movie_provider(movie_id)
 
     return {
         "title": movie_details.get('title'),

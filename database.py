@@ -44,7 +44,7 @@ def add_movie(movie_name: str, tmdb_id: int, duration: float, providers: str, ra
 def get_movies() -> list:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute(''' SELECT name, duration, provider, rating FROM movies WHERE viewed == FALSE ''')
+    cursor.execute(''' SELECT name, duration, provider, rating FROM movies WHERE viewed == FALSE ORDER BY name ''')
     movies = cursor.fetchall()
     conn.close()
 
