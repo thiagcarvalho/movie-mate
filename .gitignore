@@ -15,5 +15,3 @@ data/
 
 #Arquivo sensíveis
 .env
-
-Procfile
