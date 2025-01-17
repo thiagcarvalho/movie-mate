@@ -125,7 +125,7 @@ class MovieCommands(commands.Cog):
                 embed_filme.set_image(url=poster_url)
                 embed_filme.add_field(name='Nome:', value=filme[0], inline=False)
                 embed_filme.add_field(name='Duração:', value=duracao)
-                embed_filme.add_field(name='Streamio:', value=streamio)
+                embed_filme.add_field(name='Onde Passa:', value=streamio)
 
                 await ctx.send(embed=embed_filme)
 
@@ -145,7 +145,7 @@ class MovieCommands(commands.Cog):
 
                 elif view.response == False:
                     rejeitados.append(filme[0])
-                    await ctx.send(embed=info_embed('Filme rejeitado. Sorteando outro filme...'))
+                    await ctx.send(embed=send_error_embed('Filme rejeitado. Sorteando outro filme...'))
                     time.sleep(2)
                 else:
                     await ctx.send(embed=send_error_embed('Erro ao selecionar o filme.'))
