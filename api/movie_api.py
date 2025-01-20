@@ -1,6 +1,5 @@
 import requests
 import os
-from database import get_movieid_by_name
 
 TMDB_API_KEY = os.getenv('API_KEY')
 TMDB_BASE_URL = 'https://api.themoviedb.org/3/'

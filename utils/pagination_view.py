@@ -42,7 +42,7 @@ class PaginationView(View):
         embed.set_footer(text=f"Página {self.current_page + 1}/{self.total_pages + 1}")
 
         for i, item in enumerate(items, start=start + 1):
-            embed.add_field(name=f"{i}. {item[0]}", value=f"⏳ {item[1]} - ⭐ {item[3]}", inline=False)
+            embed.add_field(name=f"{i}. {item.name}", value=f"⏳ {item.duration} - ⭐ {item.rating}", inline=False)
 
         return embed
     
