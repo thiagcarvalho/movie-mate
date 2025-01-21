@@ -16,6 +16,7 @@ def search_movie(movie_name: str) -> dict:
 
     response = requests.get(url, headers=headers)
 
+    print(response)
     if response.status_code == 200:
         results = response.json().get('results')
         if results:
@@ -87,6 +88,7 @@ def fetch_movie_data(movie_name: str) -> dict:
 
     movie = search_movie(movie_name)
     
+    print(movie)
     if "error" in movie:
         return movie
     
