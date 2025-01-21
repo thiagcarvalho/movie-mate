@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config():
-
-    DATABASE_URL = os.getenv('DATABASE_URL1')
+    DATABASE_URL = os.getenv('URL_DATABASE')
     BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 
