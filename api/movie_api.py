@@ -13,7 +13,8 @@ def search_movie(movie_name: str) -> dict:
         "accept": "application/json", 
         "Authorization": f"Bearer {TMDB_API_KEY}"
     }
-
+    print(url)
+    print(headers)
     response = requests.get(url, headers=headers)
 
     print(response)
