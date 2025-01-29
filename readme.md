@@ -1,6 +1,6 @@
 # Discord Movie Bot
 
-Um bot do Discord para gerenciamento de uma lista de filmes, permitindo adicionar, sortear e selecionar filmes para assistir.
+**Movie Mate** é um bot do Discord que permite gerenciar uma lista de filmes de forma interativa. Com ele, os usuários podem adicionar, listar, sortear e selecionar filmes para assistir, além de obter informações detalhadas como duração, onde assistir e nota da comunidade. O bot utiliza a API do TMDB para garantir uma base de dados sempre atualizada.
 
 ## How to download it
 
