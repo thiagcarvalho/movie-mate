@@ -8,10 +8,8 @@ venv/
 env/
 .venv/
 
-#Banco de dados
-*.sqlite3
-db.sqlite3
-data/
+Procfile
+runtime.txt
 
 #Arquivo sensíveis
 .env
