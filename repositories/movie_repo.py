@@ -8,7 +8,7 @@ def get_movies() -> list[Movie]:
 
 def get_movie_by_name(name: str) -> Movie:
     with db_session() as db:
-        return db.query(Movie).filter(Movie.name == name).first()
+        return db.query(Movie).filter(Movie.name == name, Movie.viewed == False).first()
 
 def create_movie(name: str, duration: str, provider: str,
                  rating: float, poster_url: str, added_by: str) -> Movie:
