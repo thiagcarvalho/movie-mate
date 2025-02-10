@@ -14,12 +14,20 @@ Base.metadata.create_all(bind=engine)
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='f!', intents=intents)
 
 @bot.event
 async def on_ready():
     await bot.load_extension('cogs.movie_commands')
 
-    print(f'Bot Renanzin está ONLINE Rogerinho!')
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        embed = discord.Embed(
+            title='Comando não encontrado',
+            description='Use f!help para ver os comandos disponíveis.',
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed)
 
 bot.run(DISCORD_TOKEN)
