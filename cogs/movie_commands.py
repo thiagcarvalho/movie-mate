@@ -94,7 +94,6 @@ class MovieCommands(commands.Cog):
     @commands.command(name='sortear', brief='Sorteia um filme da lista')
     async def sortear_filme(self, ctx: commands.Context):
         movies: list = get_movies_names()
-
         if not movies:
             await ctx.send(embed=send_error_embed('Nenhum filme adicionado.'))
             return
@@ -104,7 +103,7 @@ class MovieCommands(commands.Cog):
 
         try:
             while not selecionado:
-                filme_disponiveis = [filme for filme in movies if filme[0] not in rejeitados]
+                filme_disponiveis = [filme for filme in movies if filme not in rejeitados]
 
                 if not filme_disponiveis:
                     await ctx.send(embed=send_error_embed('Não há filmes disponíveis para sorteio.'))
@@ -112,6 +111,7 @@ class MovieCommands(commands.Cog):
 
                 filme = random.choice(filme_disponiveis)
                 info = get_movie_by_name(filme)
+
                 duracao = info.duration
                 streamio = info.provider
                 poster_url = f"https://image.tmdb.org/t/p/original{info.poster_url}"
@@ -144,7 +144,7 @@ class MovieCommands(commands.Cog):
                     return
 
                 elif view.response == False:
-                    rejeitados.append(filme[0])
+                    rejeitados.append(filme)
                     await ctx.send(embed=send_error_embed('Filme rejeitado. Sorteando outro filme...'))
                     time.sleep(2)
                 else:
@@ -159,5 +159,55 @@ class MovieCommands(commands.Cog):
             await ctx.send(embed=send_error_embed(f'Ocorreu um erro: {str(e)}'))
             return
     
+    @commands.command(name='selecionar', brief='Seleciona um filme da lista')
+    async def selecionar_filme(self, ctx: commands.Context, *, movie_name: str):
+        movie = get_movie_by_name(movie_name)
+
+        try:
+
+            if not movie:
+                await ctx.send(embed=send_error_embed(f'O filme {movie_name} não foi encontrado.'))
+                return
+            
+            embed_filme = discord.Embed(
+                color=discord.Color.dark_grey(),
+                title='Filme Escolhido'
+            )
+
+            poster_url = f"https://image.tmdb.org/t/p/original{movie.poster_url}"
+
+            embed_filme.set_image(url=poster_url)
+            embed_filme.add_field(name='Nome:', value=movie.name, inline=False)
+            embed_filme.add_field(name='Duração:', value=movie.duration)
+            embed_filme.add_field(name='Onde Passa:', value=movie.provider)
+            
+            await ctx.send(embed=embed_filme)
+
+            view = FilmSelectionView(ctx)
+            await ctx.send(embed=info_embed('Deseja selecionar o filme?'), view=view)
+            
+            await view.wait()
+
+            if view.response:
+
+                if not update_movie(movie, viewed=True):
+                    await ctx.send(embed=send_error_embed('Não foi possível selecionar o filme.'))
+                    return
+                
+                await ctx.send(embed=success_embed(f'O filme {movie.name} foi selecionado com sucesso!'))
+                return
+            
+            else:
+                await ctx.send(embed=info_embed(f'O filme {movie.name} não foi selecionado'))
+                return
+            
+        except asyncio.TimeoutError:
+            await ctx.send(embed=warning_embed('Tempo esgotado para selecionar o filme.'))
+            return
+
+        except Exception as e:
+            await ctx.send(embed=send_error_embed(f'Ocorreu um erro ao selecionar o filme'))
+            return
+
 async def setup(bot):
     await bot.add_cog(MovieCommands(bot))
