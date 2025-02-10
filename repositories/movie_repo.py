@@ -25,7 +25,7 @@ def create_movie(name: str, duration: str, provider: str,
 
 def get_movies_names() -> list[str]:
     with db_session() as db:
-        return [movie.name for movie in db.query(Movie).all()]
+        return [movie.name for movie in db.query(Movie).filter(Movie.viewed == False).all()]
 
 def update_movie(movie: Movie, **kwargs) -> bool:
     with db_session() as db:
